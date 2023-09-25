@@ -1,0 +1,10 @@
+enum34==1.0.4
+WTForms==2.0.2
+WTForms-JSON==0.2.10
+Flask==1.0
+Flask-Login==0.2.11
+Flask-SocketIO==0.6.0
+Pyro4==4.39
+PyYAML==5.1
+requests==2.20.0
+terminaltables==1.2.1
