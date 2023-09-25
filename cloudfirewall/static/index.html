@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Cloud Firewall</title>
+    <!-- Jquqry JS -->
+    <script src="static/js/jquery-1.11.3.min.js"></script>
+    <!-- Bootstarp -->
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="static/css/style.css" />
+
+    </head>
+<body class="">
+
+    <section id="top_bar">
+        <nav class="navbar navbar-inverse navbar-fixed-top">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <div>
+                        <a class="navbar-brand" href="#" style="float: right;">Cloud Firewall</a>
+                        <img src="static/imgs/fire-ball-icon-hi.png" width="50" height="50" alt="fire icon">
+                    </div>
+                </div>
+                <div id="navbar" class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav navbar-right topBarLinks">
+                        <li class="dashboardLink"><a href="#">Dashboard</a></li>
+                        <li class="settingsLink"><a href="#">Settings</a></li>
+                        <li class="logoutLink"><a href="#">Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </section>
+
+    <section id="main" class="container-fluid">
+
+        <div id="login" class="col-xs-3 col-centered hidden">
+            <div>
+
+                <form class="form-signin">
+                    <h2 class="form-signin-heading text-center"><font color="white">Please sign-in</font></h2>
+                    <label for="loginInputUsername" class="sr-only">Username</label>
+                    <input type="text" id="loginInputUsername" class="form-control" placeholder="Username" required autofocus>
+                    <label for="loginInputPassword" class="sr-only">Password</label>
+                    <input type="password" id="loginInputPassword" class="form-control" placeholder="Password" required>
+                </form>
+                </br>
+                <button class="btn btn-lg btn-success btn-block">Sign in</button>
+            </div>
+        </div>
+
+        <div id="dashboard" class="hidden" style="margin-top: -40px;">
+            <h2 class="sub-header">Mode: <small id="dashboardModeHeader" style="font-size:25px; color: coral"></small></h2>
+
+            <div class="row" style="margin-top: 10px;">
+                <div class="col-xs-4">
+                    <canvas id="dataFlowStats" width="400" height="200"></canvas>
+                    <h4>Traffic Bandwidth</h4>
+                    <span class="text-muted">Displays traffic bandwidth (in Mbit/second) passed through the firewall the last minute.</span>
+                </div>
+
+                <div class="col-xs-4">
+                    <canvas id="blocksPerSessionByInterval" width="400" height="200"></canvas>
+                    <h4>Allowed and Blocked Sessions</h4>
+                    <span class="text-muted">Displays the total number of allowed and blocked sessions in the last 10 minites.<br>Allowed sessions in blue<br>Blocked sessions in gray</span>
+                </div>
+                <div class="col-xs-4">
+                    <canvas id="blocksPerProtocol" width="400" height="200"></canvas>
+                    <h4>Sessions Per Protocol</h4>
+                    <span class="text-muted">Displays the total amount of<br> recieved sessions per protocol type.</span>
+                </div>
+            </div>
+
+            <h2 class="sub-header">Events Table</h2>
+             <table class="table" style="table-layout:fixed">
+                    <thead>
+                        <tr>
+                            <th width="2%">#</th>
+                            <th width="15%">Time</th>
+                            <th width="10%">Action</th>
+                            <th width="10%">Direction</th>
+                            <th width="15%">Source IP</th>
+                            <th width="15%">Destination IP</th>
+                            <th width="10%">Protocol</th>
+                            <th width="15%">Source Port</th>
+                            <th width="15%">Destination Port</th>
+                        </tr>
+                    </thead>
+              </table>
+            <div class="table-responsive" style="margin-top: -20px; height:200px; overflow:auto;">
+
+                <table class="table table-striped" id="dashboardEventsTable" style="table-layout:fixed">
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="row" style="margin-top: -30px;">
+                <br><br>
+                <h2 class="sub-header" style="margin-left:15px;">Audit Log</h2>
+                <textarea id="dashboardEventslogger" class="col-xs-11" style="height: 100px;" disabled>
+                </textarea>
+                <button type="button" class="btn btn-primary col-xs-1" style="height:100px;" id="loggerClearButton">Clear Log</button>
+            </div>
+        </div>
+
+        <div id="settings" class="hidden">
+            <div>
+                <h2>Mode: <small id="settingsModeHeader" style="font-size:25px; color: coral"></small></h2>
+               <div class="dropdown">
+                   <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                       Change Mode
+                       <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-toggle" aria-labelledby="dropdownMenu1" id="setFirewallMode">
+                        <li title="Blocks all traffic but the traffic that matches a given set of rules"><a href="#">WhiteList</a></li>
+                        <li title="Allows all traffic but the traffic that matches a given set of rules"><a href="#">BlackList</a></li>
+                        <li title="Allows all traffic"><a href="#">PassThrough</a></li>
+                    </ul>
+                </div>
+
+                <h2 class="page-header" id="settingsTableRulesHeader">Table Rules</h2>
+
+                <div class="table-responsive">
+                    <table class="table table-striped" id="settingsTableRules">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Action</th>
+                            <th>Direction</th>
+                            <th>Source IP</th>
+                            <th>Source Port</th>
+                            <th>Destination IP</th>
+                            <th>Destination Port</th>
+                            <th>Protocol</th>
+                            <th>Edit</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <section id="templates">
+
+        <div id="loadingModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-hidden="true" style="padding-top:15%; overflow-y:visible;">
+            <div class="modal-dialog modal-m">
+                <div class="modal-content">
+                    <div class="modal-header"><h3 style="margin:0;">Loading...</h3></div>
+                    <div class="modal-body">
+                        <div class="progress progress-striped active" style="margin-bottom:0;">
+                            <div class="progress-bar progress-bar-warning" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="errorModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-hidden="true" style="padding-top:15%; overflow-y:visible;">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header"><h3 style="margin:0;">Error</h3></div>
+                        <div class="modal-body">
+                            <span id="errorMsg"></span><br>
+                            <button class="btn btn-success center-block">OK</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="editRuleModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-hidden="true" style="padding-top:15%; overflow-y:visible;">
+            <div class="modal-dialog modal-m">
+                <div class="modal-content">
+                    <div class="modal-header"><h3 style="margin:0;">Edit Rule</h3></div>
+                        <div class="modal-body">
+                            <span id="editRuleId" style="display: none;"></span>
+                            <table class="table table-striped">
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Old Values</th>
+                                    <th>New Values</th>
+                                </tr>
+                                <tr>
+                                    <td>Direction</td>
+                                    <td><span id="editRuleOldDirection"></span></td>
+                                    <td>
+                                        <select id='editRuleNewDirection'>
+                                            <option value='Incoming'>Incoming</option>
+                                            <option value='Outgoing'>Outgoing</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Source IP</td>
+                                    <td><span id="editRuleOldSourceIp"></span></td>
+                                    <td><input type="text" id="editRuleNewSourceIp" placeholder='Source IP'></td>
+                                </tr>
+                                <tr>
+                                    <td>Source Port</td>
+                                    <td><span id="editRuleOldSourcePort"></span></td>
+                                    <td><input type='text' min='0' id='editRuleNewSourcePort' placeholder='Source Port'></td>
+                                </tr>
+                                <tr>
+                                    <td>Destination IP</td>
+                                    <td><span id="editRuleOldDestinationIp"></span></td>
+                                    <td><input type="text" id="editRuleNewDestinationIp" placeholder='Destination IP'></td>
+                                </tr>
+                                <tr>
+                                    <td>Destination Port</td>
+                                    <td><span id="editRuleOldDestinationPort"></span></td>
+                                    <td><input type='text' min='0' id='editRuleNewDestinationPort' placeholder='Destination Port'></td>
+                                </tr>
+                                <tr>
+                                    <td>Protocol</td>
+                                    <td><span id="editRuleOldProtocol"></span></td>
+                                    <td><select id='editRuleNewProtocol'>
+                                        <option value='TCP/UDP'>TCP/UDP</option>
+                                        <option value='TCP'>TCP</option>
+                                        <option value='UDP'>UDP</option>
+                                    </select></td>
+                                </tr>
+                            </table>
+                            <div class="text-center">
+                                <span id="editRuleError" style="color: red;"></span><br>
+                            </div>
+                            <div align="center">
+                                <button class="btn btn-success" id="editConfirmationButton">Save</button>
+                                <button class="btn" id="editCloseButton">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- handlebars JS -->
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.3/handlebars.amd.js" />-->
+
+    <!-- Bootstarp JS -->
+    <script src="static/js/bootstrap.min.js"></script>
+    <!-- Chart JS -->
+    <script src="static/js/Chart.js"></script>
+    <!-- Masked JS -->
+    <script src="static/js/jquery.maskedinput.js"></script>
+    <!-- Socket.io JS -->
+    <script type="text/javascript" src="static/js/socket.io.min.js"></script>
+    <!-- CloudFirewall JS -->
+    <script src="static/js/script.js"></script>
+</body>
+</html>
